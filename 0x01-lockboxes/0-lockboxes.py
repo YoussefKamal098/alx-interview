@@ -53,7 +53,7 @@ def canUnlockAll(boxes):
         the keys in the current box
         """
         for key in boxes[key]:
-            if not unlocked_boxes[key]:
+            if key < len(boxes) and not unlocked_boxes[key]:
                 tryUnlockBoxes(key)
 
     # Start unlocking from the first box (box 0)
@@ -66,3 +66,5 @@ def canUnlockAll(boxes):
 
     # If all boxes are unlocked, return True
     return True
+
+boxes = [[1,1,1,1,1]]
