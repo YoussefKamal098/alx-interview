@@ -36,9 +36,6 @@ def canUnlockAll(boxes):
     """
     boxes_number = len(boxes)
 
-    if boxes_number == 0:
-        return True
-
     # List to track which boxes are unlocked; initially, all boxes are locked
     unlocked_boxes = [False] * boxes_number
 
