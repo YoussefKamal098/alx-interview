@@ -1,34 +1,32 @@
-# alx-interview
+# Lockboxes Problem
 
-# Table of Contents
+## Table of Contents
 
-1. [Lockboxes Problem](#lockboxes-problem)
-   - [Problem Statement](#problem-statement)
-   - [Function Prototype](#function-prototype)
-2. [Solution Explanation](#solution-explanation)
+1. [Problem Statement](#problem-statement)
+2. [Function Prototype](#function-prototype)
+3. [Solution Explanation](#solution-explanation)
    - [1. Initialization of the `unlocked_boxes` list](#1-initialization-of-the-unlocked_boxes-list)
    - [2. Recursive Box Unlocking (Depth-First Search)](#2-recursive-box-unlocking-depth-first-search)
    - [3. Starting from the First Box](#3-starting-from-the-first-box)
    - [4. Verification](#4-verification)
-3. [Solution Code](#solution-code)
+4. [Solution Code](#solution-code)
    - [Example Usage](#example-usage)
-4. [Detailed Walkthrough](#detailed-walkthrough)
+5. [Detailed Walkthrough](#detailed-walkthrough)
    - [Initialization](#initialization)
    - [Recursive Function (`tryUnlockBoxes`)](#recursive-function-tryunlockboxes)
    - [Final Check](#final-check)
-5. [Time Complexity](#time-complexity)
-6. [Space Complexity](#space-complexity)
-7. [Edge Cases](#edge-cases)
+6. [Time Complexity](#time-complexity)
+7. [Space Complexity](#space-complexity)
+8. [Edge Cases](#edge-cases)
    - [1. No boxes or only one box](#1-no-boxes-or-only-one-box)
    - [2. Unreachable boxes](#2-unreachable-boxes)
    - [3. Boxes containing no keys](#3-boxes-containing-no-keys)
 
-### 1 - Lockboxes Problem
 
-#### Problem Statement
+### Problem Statement
 You are given `n` number of locked boxes arranged sequentially, where each box is indexed from 0 to `n-1`. Each box may contain keys to open other boxes. The task is to determine whether all the boxes can be unlocked. The first box (`boxes[0]`) is already unlocked, and you must check if you can open all other boxes using the keys found inside.
 
-#### Function Prototype
+### Function Prototype
 ```python
 def canUnlockAll(boxes)
 ```
@@ -59,7 +57,7 @@ The function follows these steps to solve the problem:
 4. **Verification:**
    - After attempting to unlock all possible boxes, the function checks the `unlocked_boxes` list to see if all boxes have been unlocked. If any box remains locked (`False`), the function returns `False`; otherwise, it returns `True`.
 
-### [Solution Here](./0-lockboxes.py)
+### [Solution Here](0-lockboxes.py)
 
 ### Example Usage:
 ```python
