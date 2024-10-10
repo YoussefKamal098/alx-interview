@@ -19,7 +19,7 @@ def canUnlockAll(boxes):
     Determines whether all boxes can be unlocked.
 
     Args:
-        boxes (list of lists): A list where each sublist represents a box, and
+        boxes (list[list[int]]): A list where each sublist represents a box, and
                                each box contains integers representing keys
                                to other boxes.
 
@@ -34,9 +34,14 @@ def canUnlockAll(boxes):
         - After trying to unlock boxes, we verify if every box is unlocked
           by checking a list that tracks the unlocking status of each box.
     """
+
+    # Get the total number of boxes
     boxes_number = len(boxes)
 
-    # List to track which boxes are unlocked; initially, all boxes are locked
+    """
+     A list to track the unlocking status of each box;
+     initially all boxes are locked (False)
+    """
     unlocked_boxes = [False] * boxes_number
 
     def tryUnlockBoxes(key):
@@ -45,25 +50,29 @@ def canUnlockAll(boxes):
 
         Args:
             key (int): The index of the box to unlock.
+
+        This function marks the current box (indexed by 'key') as unlocked,
+        and then checks the keys inside this box to recursively unlock
+        any other boxes.
         """
-        # Unlock the current box
+        # Mark the current box as unlocked
         unlocked_boxes[key] = True
 
-        """
-        Try to unlock all boxes that can be opened with
-        the keys in the current box
-        """
+        # Iterate over all the keys inside the current box
         for key in boxes[key]:
+            """
+            If the key corresponds to a valid box index and
+            that box hasn't been unlocked yet
+            """
             if key < boxes_number and not unlocked_boxes[key]:
+                # Recursively unlock the box corresponding to this key
                 tryUnlockBoxes(key)
 
-    # Start unlocking from the first box (box 0)
+    # Start unlocking from box 0 (which is always unlocked)
     tryUnlockBoxes(0)
 
-    # Check if all boxes are unlocked
-    for key in unlocked_boxes:
-        if not key:  # If any box is still locked, return False
-            return False
-
-    # If all boxes are unlocked, return True
-    return True
+    """
+    After attempting to unlock all possible boxes,
+    check if all boxes have been unlocked
+    """
+    return all(unlocked_boxes)
