@@ -19,9 +19,9 @@ def canUnlockAll(boxes):
     Determines whether all boxes can be unlocked.
 
     Args:
-        boxes (list[list[int]]): A list where each sublist represents a box, and
-                               each box contains integers representing keys
-                               to other boxes.
+        boxes (list[list[int]]): A list where each sublist represents a box,
+                                and each box contains integers representing
+                                keys to other boxes.
 
     Returns:
         bool: True if all boxes can be unlocked, otherwise False.
