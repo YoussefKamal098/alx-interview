@@ -34,9 +34,13 @@ def canUnlockAll(boxes):
         - After trying to unlock boxes, we verify if every box is unlocked
           by checking a list that tracks the unlocking status of each box.
     """
+    boxes_number = len(boxes)
 
     # List to track which boxes are unlocked; initially, all boxes are locked
-    unlocked_boxes = [False] * len(boxes)
+    unlocked_boxes = [False] * boxes_number
+
+    # Unlock first box
+    unlocked_boxes[0] = True
 
     def tryUnlockBoxes(key):
         """
@@ -45,15 +49,16 @@ def canUnlockAll(boxes):
         Args:
             key (int): The index of the box to unlock.
         """
-        # Unlock the current box
-        unlocked_boxes[key] = True
 
         """
         Try to unlock all boxes that can be opened with
         the keys in the current box
         """
         for key in boxes[key]:
-            if key < len(boxes) and not unlocked_boxes[key]:
+            if key < boxes_number and not unlocked_boxes[key]:
+                # Unlock the current box
+                unlocked_boxes[key] = True
+
                 tryUnlockBoxes(key)
 
     # Start unlocking from the first box (box 0)
@@ -66,3 +71,7 @@ def canUnlockAll(boxes):
 
     # If all boxes are unlocked, return True
     return True
+
+
+boxes = []
+print(canUnlockAll(boxes))
