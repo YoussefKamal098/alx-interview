@@ -66,5 +66,3 @@ def canUnlockAll(boxes):
 
     # If all boxes are unlocked, return True
     return True
-
-boxes = [[1,1,1,1,1]]
