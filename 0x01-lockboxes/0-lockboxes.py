@@ -54,6 +54,7 @@ def canUnlockAll(boxes):
         Try to unlock all boxes that can be opened with
         the keys in the current box
         """
+
         for key in boxes[key]:
             if key < boxes_number and not unlocked_boxes[key]:
                 # Unlock the current box
