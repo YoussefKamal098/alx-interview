@@ -9,7 +9,7 @@
    - [2. Greedy Approach](#2-greedy-approach)
    - [3. Calculating Operations](#3-calculating-operations)
    - [4. Returning the Result](#4-returning-the-result)
-4. [Solution Code](#solution-code)
+4. [Solution Code](#solution-here)
    - [Example Usage](#example-usage)
 5. [Detailed Walkthrough](#detailed-walkthrough)
    - [Prime Factorization and Operations](#prime-factorization-and-operations)
