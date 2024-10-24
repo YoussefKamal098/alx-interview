@@ -186,7 +186,6 @@ class ConsoleObserver(Observer):
             print(f"{code}: {count}")
 
 
-# Example usage
 def main():
     """Main entry point for the log parser."""
     # You can pass any iterable as a stream, for example, a file or a list
