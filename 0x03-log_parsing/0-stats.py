@@ -147,11 +147,11 @@ class StreamLogParser(ABC):
 class ConcreteLogParser(StreamLogParser):
     """Concrete implementation of StreamLogParser that processes log data."""
 
-    _pattern = r'(?P<ip_address>\d{1,3}(?:\.\d{1,3}){3}) - ' \
-               r'\[(?P<date>\d{4}-\d{2}-\d{2} ' \
-               r'\d{2}:\d{2}:\d{2}(?:\.\d{,12})?)\] ' \
-               r'\"GET /projects/260 HTTP/1\.1\" ' \
-               r'(?P<status_code>\d{3}) (?P<file_size>\d+)'
+    _pattern = re.compile(r'(?P<ip_address>\d{1,3}(?:\.\d{1,3}){3}) - '
+                          r'\[(?P<date>\d{4}-\d{2}-\d{2} '
+                          r'\d{2}:\d{2}:\d{2}(?:\.\d{,12})?)\] '
+                          r'\"GET /projects/260 HTTP/1\.1\" '
+                          r'(?P<status_code>\d{3}) (?P<file_size>\d{,12})')
 
     def __init__(self, stream):
         """
@@ -207,7 +207,7 @@ class ConcreteLogParser(StreamLogParser):
             Dict[str, Any]: A dictionary with parsed log components if
                             matched, else empty.
         """
-        match = re.match(cls._pattern, log)
+        match = re.fullmatch(cls._pattern, log)
         if not match:
             print(
                 "Log doesn't match the expected pattern. "
