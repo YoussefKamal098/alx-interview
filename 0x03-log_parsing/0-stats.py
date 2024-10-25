@@ -22,7 +22,6 @@ import signal
 import sys
 import re
 from abc import ABC, abstractmethod
-from collections import defaultdict
 
 
 class SignalHandler:
@@ -163,7 +162,7 @@ class ConcreteLogParser(StreamLogParser):
         """
         super().__init__(stream)
         self._files_size = 0
-        self._status_code_count = defaultdict(int)
+        self._status_code_count = {}
         self._line_count = 0
         self.signal_handler = SignalHandler(signal.SIGINT)
         self.signal_handler.callback = self.notify  # Set callback for signal
@@ -231,7 +230,11 @@ class ConcreteLogParser(StreamLogParser):
             status_code (int): HTTP status code of the response.
         """
         self._files_size += file_size
-        self._status_code_count[status_code] += 1
+
+        if not self._status_code_count.get(status_code):
+            self._status_code_count[status_code] = 1
+        else:
+            self._status_code_count[status_code] += 1
 
     def get_summary(self) -> dict[str, any]:
         """
