@@ -37,7 +37,7 @@ By studying these concepts and utilizing the resources provided, you will be wel
 
 ### Additional Resources
 
-- [Mock Technical Interview](https://www.example.com) (Replace with actual resource link)
+- [Mock Technical Interview](https://www.youtube.com/watch?feature=shared&v=5dRTK-_Bzd0)
 
 ## Requirements
 
