@@ -67,11 +67,14 @@ def process_line(line: str):
     Process a single line of log, updating metrics if
     the line is in the correct format.
     """
+    global line_count
     global total_file_size
 
     match = re.fullmatch(log_pattern, line)
     if not match:
         return
+
+    line_count += 1
 
     try:
         file_size = int(match.group("file_size"))
@@ -102,10 +105,9 @@ if __name__ == "__main__":
     # Read lines from stdin and process them
     for line in sys.stdin:
         process_line(line.strip())
-        line_count += 1
 
         # Print metrics every 10 lines
-        if line_count % 10 == 0:
+        if line_count % 10 == 0 and line_count > 0:
             print_metrics()
 
     # Print any remaining metrics after the loop
