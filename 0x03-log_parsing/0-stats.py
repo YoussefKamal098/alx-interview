@@ -35,11 +35,11 @@ import re
 
 # Precompiled regex pattern to match the log line format
 log_pattern = re.compile(
-    r'(?P<ip_address>((\d{1,3}(?:\.\d{1,3}){3})|\w+)) - '
+    r'(?P<ip_address>(?:\d{1,3}\.){3}\d{1,3}|[a-zA-Z0-9.-]+) - '
     r'\[(?P<date>\d{4}-\d{2}-\d{2} '
     r'\d{2}:\d{2}:\d{2}(?:\.\d{,12})?)\] '
     r'\"GET /projects/260 HTTP/1\.1\" '
-    r'(?P<status_code>(200|301|400|401|403|404|405|500|\.w+)) '
+    r'(?P<status_code>\d{3}|\w+) '
     r'(?P<file_size>\d{,12})'
 )
 

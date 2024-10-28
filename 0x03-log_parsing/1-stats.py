@@ -147,11 +147,14 @@ class StreamLogParser(ABC):
 class ConcreteLogParser(StreamLogParser):
     """Concrete implementation of StreamLogParser that processes log data."""
 
-    _pattern = re.compile(r'(?P<ip_address>\d{1,3}(?:\.\d{1,3}){3}) - '
-                          r'\[(?P<date>\d{4}-\d{2}-\d{2} '
-                          r'\d{2}:\d{2}:\d{2}(?:\.\d{,12})?)\] '
-                          r'\"GET /projects/260 HTTP/1\.1\" '
-                          r'(?P<status_code>\d{3}) (?P<file_size>\d{,12})')
+    _pattern = re.compile(
+        r'(?P<ip_address>\d{1,3}(?:\.\d{1,3}){3}) - '
+        r'\[(?P<date>\d{4}-\d{2}-\d{2} '
+        r'\d{2}:\d{2}:\d{2}(?:\.\d{,12})?)\] '
+        r'\"GET /projects/260 HTTP/1\.1\" '
+        r'(?P<status_code>(200|301|400|401|403|404|405|500)) '
+        r'(?P<file_size>\d{,12})'
+    )
 
     def __init__(self, stream):
         """
