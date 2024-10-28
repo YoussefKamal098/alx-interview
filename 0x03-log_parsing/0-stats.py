@@ -35,11 +35,11 @@ import re
 
 # Precompiled regex pattern to match the log line format
 log_pattern = re.compile(
-    r'(?P<ip_address>\d{1,3}(?:\.\d{1,3}){3}) - '
+    r'(?P<ip_address>((\d{1,3}(?:\.\d{1,3}){3})|\w+)) - '
     r'\[(?P<date>\d{4}-\d{2}-\d{2} '
     r'\d{2}:\d{2}:\d{2}(?:\.\d{,12})?)\] '
     r'\"GET /projects/260 HTTP/1\.1\" '
-    r'(?P<status_code>(?:200|301|400|401|403|404|405|500)) '
+    r'(?P<status_code>(200|301|400|401|403|404|405|500|\.w+)) '
     r'(?P<file_size>\d{,12})'
 )
 
@@ -74,8 +74,6 @@ def process_line(line: str):
     if not match:
         return
 
-    line_count += 1
-
     try:
         file_size = int(match.group("file_size"))
         status_code = match.group("status_code")
@@ -105,6 +103,8 @@ if __name__ == "__main__":
     # Read lines from stdin and process them
     for line in sys.stdin:
         process_line(line.strip())
+
+        line_count += 1
 
         # Print metrics every 10 lines
         if line_count % 10 == 0 and line_count > 0:
