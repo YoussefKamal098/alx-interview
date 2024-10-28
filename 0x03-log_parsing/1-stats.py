@@ -198,6 +198,8 @@ class ConcreteLogParser(StreamLogParser):
             except ValueError as e:
                 print(f"Error parsing the log '{log}': {e}")
 
+        self.notify()   # Notify observers with the final summary
+
     @classmethod
     def parse_log(cls, log: str) -> dict[str, any]:
         """
