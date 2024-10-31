@@ -11,7 +11,7 @@ scheme, ensuring that each character's byte pattern is correct.
 """
 
 
-def validUTF8(data: list[int]) -> bool:
+def validUTF8(data):
     """
     Determines if a given dataset represents a valid UTF-8 encoding.
 
