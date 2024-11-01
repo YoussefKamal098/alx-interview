@@ -36,8 +36,7 @@ def validUTF8(data):
 
     for num in data:
         # Ensure byte is within the valid range for UTF-8 (0-255).
-        if num < 0 or num > 255:
-            return False
+        num = num & 0xFF
 
         # Start of a new UTF-8 character
         if n_bytes == 0:
