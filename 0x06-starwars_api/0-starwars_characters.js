@@ -1,69 +1,117 @@
 #!/usr/bin/node
 const request = require('request');
+const pLimit = require('p-limit'); // Install this package
 const STAR_WARS_API_BASE_URL = 'https://swapi-api.hbtn.io/api';
+
+/**
+ * Lock Manager class that handles lock operations for different processes.
+ * It ensures that certain processes are not executed concurrently.
+ */
+class LockManager {
+  constructor () {
+    this.locks = new Map(); // A map to store lock statuses for various operations
+  }
+
+  /**
+   * Check if a given operation is in progress.
+   * @param {string} operationName - The name of the operation to check.
+   * @returns {boolean} True if the operation is in progress, false otherwise.
+   */
+  isOperationInProgress (operationName) {
+    return !!this.locks.get(operationName); // Return true if the operation is locked
+  }
+
+  /**
+   * Set the lock for a given operation with a timeout to avoid deadlocks.
+   * @param {string} operationName - The name of the operation to lock.
+   * @param {number} timeout - The timeout in milliseconds.
+   * @returns {Promise<void>} A promise that resolves when the lock is acquired.
+   * @throws {Error} If the lock is not acquired within the timeout period.
+   */
+  async setLock (operationName, timeout = 5000) {
+    const startTime = Date.now();
+
+    // If the operation is already locked, wait until it's released or timeout occurs
+    while (this.isOperationInProgress(operationName)) {
+      if (Date.now() - startTime > timeout) {
+        throw new Error(`Timeout: Unable to acquire lock for ${operationName}`);
+      }
+      await new Promise(resolve => setTimeout(resolve, 100)); // Wait for 100ms before retrying
+    }
+
+    this.locks.set(operationName, true); // Lock the operation
+  }
+
+  /**
+   * Release the lock for a given operation.
+   * @param {string} operationName - The name of the operation to release the lock for.
+   */
+  releaseLock (operationName) {
+    if (!this.isOperationInProgress(operationName)) {
+      console.warn(`${operationName} is not locked.`);
+      return;
+    }
+    this.locks.delete(operationName); // Release the lock for the operation
+  }
+}
 
 /**
  * Class representing the interaction with the Star Wars API.
  * Provides methods to fetch movie and character data from the Star Wars API.
  */
 class StarWarsAPI {
-  /**
-   * Creates an instance of StarWarsAPI.
-   * @param {string} baseUrl - The base URL for the Star Wars API.
-   */
   constructor (baseUrl) {
     this.baseUrl = baseUrl;
   }
 
-  /**
-   * Constructs the URL for a specific movie's endpoint.
-   * @param {number} movieId - The ID of the movie to retrieve.
-   * @returns {string} The URL to the movie's endpoint.
-   */
   getMovieEndpoint (movieId) {
     return `${this.baseUrl}/films/${movieId}/`;
   }
 
-  /**
-   * Fetches the list of character URLs for a given movie.
-   * @param {number} movieId - The ID of the movie to fetch character data for.
-   * @returns {Promise<string[]>} A promise that resolves to an array of character URLs.
-   */
-  fetchMovieCharacters (movieId) {
-    return new Promise((resolve, reject) => {
-      const url = this.getMovieEndpoint(movieId);
-
-      request(url, { json: true }, (error, response, body) => {
-        if (error) {
-          return reject(error);
+  // Fetches the list of character URLs for a given movie with retry and timeout handling
+  async fetchMovieCharacters (movieId, retries = 3, timeout = 5000) {
+    const url = this.getMovieEndpoint(movieId);
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const body = await this.makeRequest(url, timeout);
+        return body.characters;
+      } catch (error) {
+        if (attempt < retries) {
+          console.log(`Retrying... Attempt ${attempt} for movie ${movieId}`);
+        } else {
+          throw new Error(`Failed to fetch characters after ${retries} retries: ${error.message}`);
         }
-
-        if (response.statusCode !== 200) {
-          return reject(new Error(`Failed to load movie: ${response.statusCode}`));
-        }
-
-        resolve(body.characters);
-      });
-    });
+      }
+    }
   }
 
-  /**
-   * Fetches the name of a character from a character URL.
-   * @param {string} characterUrl - The URL of the character to fetch the name for.
-   * @returns {Promise<string>} A promise that resolves to the character's name.
-   */
-  fetchCharacterName (characterUrl) {
+  // Fetch a character's name with retry logic
+  async fetchCharacterName (characterUrl, retries = 3, timeout = 5000) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const body = await this.makeRequest(characterUrl, timeout);
+        return body.name;
+      } catch (error) {
+        if (attempt < retries) {
+          console.log(`Retrying... Attempt ${attempt} for character ${characterUrl}`);
+        } else {
+          throw new Error(`Failed to fetch character: ${error.message}`);
+        }
+      }
+    }
+  }
+
+  // Make the actual API request with timeout
+  async makeRequest (url, timeout) {
     return new Promise((resolve, reject) => {
-      request(characterUrl, { json: true }, (error, response, body) => {
+      request({ url, json: true, timeout }, (error, response, body) => {
         if (error) {
           return reject(error);
         }
-
         if (response.statusCode !== 200) {
-          return reject(new Error(`Failed to load character: ${response.statusCode}`));
+          return reject(new Error(`Failed with status code ${response.statusCode}`));
         }
-
-        resolve(body.name);
+        resolve(body);
       });
     });
   }
@@ -74,67 +122,50 @@ class StarWarsAPI {
  * Provides methods to display character names from a specific movie.
  */
 class StarWarsCharactersApp {
-  /**
-   * Creates an instance of StarWarsCharactersApp.
-   * @param {StarWarsAPI} api - An instance of the StarWarsAPI class to fetch data from.
-   */
   constructor (api) {
     this.api = api;
+    this.lockManager = new LockManager(); // Initialize LockManager instance
+    this.limit = pLimit(5); // Limit concurrent API calls to 5 at a time
   }
 
-  /**
-   * Displays the characters from a specified movie.
-   * Character names can either be displayed one by one or all at once.
-   * @param {number | string} movieId - The ID of the movie to fetch character data for.
-   * @param {boolean} [allAtOnce=false] - Whether to display all character names at once or one by one.
-   */
   async displayCharacters (movieId, allAtOnce = false) {
+    const operationName = `fetching-characters-${movieId}`; // Lock for a specific movie
+
     try {
+      await this.lockManager.setLock(operationName);
+
       // Fetch the URLs of the movie's characters
       const characterUrls = await this.api.fetchMovieCharacters(movieId);
 
-      // Display the character names in the chosen format
+      // Limit the concurrent calls to fetch character names
       if (allAtOnce) {
         const names = await this.all(characterUrls, this.api.fetchCharacterName);
         console.log(names.join('\n'));
       } else {
-        // Display character names one by one
         for await (const name of this.one_by_one(characterUrls, this.api.fetchCharacterName)) {
           console.log(name);
         }
       }
+
+      this.lockManager.releaseLock(operationName);
     } catch (error) {
       console.error(`Error: ${error.message}`);
     }
   }
 
-  /**
-   * Fetches all character names at once using Promise.all.
-   * @param {string[]} urls - An array of character URLs to fetch the names for.
-   * @param {Function} fetchFn - The function to fetch the character names (e.g., fetchCharacterName).
-   * @returns {Promise<string[]>} A promise that resolves to an array of character names.
-   */
   async all (urls, fetchFn) {
-    return await Promise.all(urls.map(url => fetchFn(url)));
+    return await Promise.all(urls.map(url => this.limit(() => fetchFn.call(this.api, url))));
   }
 
-  /**
-   * Fetches character names one by one using async generators.
-   * @param {string[]} urls - An array of character URLs to fetch the names for.
-   * @param {Function} fetchFn - The function to fetch the character names (e.g., fetchCharacterName).
-   * @returns {AsyncGenerator<string>} An asynchronous generator that yields character names one by one.
-   */
   async * one_by_one (urls, fetchFn) {
     for (const url of urls) {
-      const name = await fetchFn(url);
-      yield name;
+      yield this.limit(() => fetchFn.call(this.api, url));
     }
   }
 }
 
 // Retrieve movie ID from command-line arguments
 const movieId = process.argv[2];
-
 if (!movieId) {
   console.error('Usage: ./0-starwars_characters.js <Movie ID>');
   process.exit(1);
@@ -145,4 +176,4 @@ const api = new StarWarsAPI(STAR_WARS_API_BASE_URL);
 const app = new StarWarsCharactersApp(api);
 
 // Display characters for the specified movie ID
-app.displayCharacters(movieId);
+app.displayCharacters(movieId, true);
