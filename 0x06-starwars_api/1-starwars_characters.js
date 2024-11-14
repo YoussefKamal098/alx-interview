@@ -1,5 +1,6 @@
 #!/usr/bin/node
 const request = require('request');
+const pLimit = require('p-limit'); // Install this package
 const STAR_WARS_API_BASE_URL = 'https://swapi-api.hbtn.io/api';
 
 /**
@@ -12,21 +13,21 @@ class LockManager {
   }
 
   /**
-   * Check if a given operation is in progress.
-   * @param {string} operationName - The name of the operation to check.
-   * @returns {boolean} True if the operation is in progress, false otherwise.
-   */
+     * Check if a given operation is in progress.
+     * @param {string} operationName - The name of the operation to check.
+     * @returns {boolean} True if the operation is in progress, false otherwise.
+     */
   isOperationInProgress (operationName) {
     return !!this.locks.get(operationName); // Return true if the operation is locked
   }
 
   /**
-   * Set the lock for a given operation with a timeout to avoid deadlocks.
-   * @param {string} operationName - The name of the operation to lock.
-   * @param {number} timeout - The timeout in milliseconds.
-   * @returns {Promise<void>} A promise that resolves when the lock is acquired.
-   * @throws {Error} If the lock is not acquired within the timeout period.
-   */
+     * Set the lock for a given operation with a timeout to avoid deadlocks.
+     * @param {string} operationName - The name of the operation to lock.
+     * @param {number} timeout - The timeout in milliseconds.
+     * @returns {Promise<void>} A promise that resolves when the lock is acquired.
+     * @throws {Error} If the lock is not acquired within the timeout period.
+     */
   async setLock (operationName, timeout = 5000) {
     const startTime = Date.now();
 
@@ -42,9 +43,9 @@ class LockManager {
   }
 
   /**
-   * Release the lock for a given operation.
-   * @param {string} operationName - The name of the operation to release the lock for.
-   */
+     * Release the lock for a given operation.
+     * @param {string} operationName - The name of the operation to release the lock for.
+     */
   releaseLock (operationName) {
     if (!this.isOperationInProgress(operationName)) {
       console.warn(`${operationName} is not locked.`);
@@ -124,6 +125,7 @@ class StarWarsCharactersApp {
   constructor (api) {
     this.api = api;
     this.lockManager = new LockManager(); // Initialize LockManager instance
+    this.limit = pLimit(5); // Limit concurrent API calls to 5 at a time
   }
 
   async displayCharacters (movieId, allAtOnce = false) {
@@ -152,12 +154,12 @@ class StarWarsCharactersApp {
   }
 
   async all (urls, fetchFn) {
-    return await Promise.all(urls.map(url => fetchFn.call(this.api, url)));
+    return await Promise.all(urls.map(url => this.limit(() => fetchFn.call(this.api, url))));
   }
 
   async * one_by_one (urls, fetchFn) {
     for (const url of urls) {
-      yield fetchFn.call(this.api, url);
+      yield this.limit(() => fetchFn.call(this.api, url));
     }
   }
 }
