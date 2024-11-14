@@ -85,7 +85,7 @@ class StarWarsCharactersApp {
   /**
    * Displays the characters from a specified movie.
    * Character names can either be displayed one by one or all at once.
-   * @param {number} movieId - The ID of the movie to fetch character data for.
+   * @param {number | string} movieId - The ID of the movie to fetch character data for.
    * @param {boolean} [allAtOnce=false] - Whether to display all character names at once or one by one.
    */
   async displayCharacters (movieId, allAtOnce = false) {
