@@ -145,4 +145,4 @@ const api = new StarWarsAPI(STAR_WARS_API_BASE_URL);
 const app = new StarWarsCharactersApp(api);
 
 // Display characters for the specified movie ID
-app.displayCharacters(movieId, true);
+app.displayCharacters(movieId);
