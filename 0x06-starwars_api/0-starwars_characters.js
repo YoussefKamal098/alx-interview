@@ -154,7 +154,7 @@ class StarWarsCharactersApp {
   }
 
   async all (urls, fetchFn) {
-    return await Promise.all(urls.map(url => this.limit(() => fetchFn.call(this.api, url))));
+    return await Promise.all(urls.map(url => this.limit(() => fetchFn.call(this.api, url, 100000))));
   }
 
   async * one_by_one (urls, fetchFn) {
