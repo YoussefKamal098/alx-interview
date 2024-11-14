@@ -73,7 +73,7 @@ class StarWarsCharactersApp {
     return await Promise.all(urls.map(url => fetchFn(url)));
   }
 
-  async * one_by_one(urls, fetchFn) {
+  async * one_by_one (urls, fetchFn) {
     for (const url of urls) {
       const name = await fetchFn(url);
       yield name;
