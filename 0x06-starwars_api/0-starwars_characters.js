@@ -52,16 +52,31 @@ class StarWarsCharactersApp {
     this.api = api;
   }
 
-  async displayCharacters (movieId) {
+  async displayCharacters (movieId, allAtOnce = false) {
     try {
       const characterUrls = await this.api.fetchMovieCharacters(movieId);
 
-      for (const url of characterUrls) {
-        const name = await this.api.fetchCharacterName(url);
-        console.log(name);
+      if (allAtOnce) {
+        const names = await this.all(characterUrls, this.api.fetchCharacterName);
+        console.log(names.join('\n'));
+      } else {
+        for await (const name of this.one_by_one(characterUrls, this.api.fetchCharacterName)) {
+          console.log(name);
+        }
       }
     } catch (error) {
       console.error(`Error: ${error.message}`);
+    }
+  }
+
+  async all (urls, fetchFn) {
+    return await Promise.all(urls.map(url => fetchFn(url)));
+  }
+
+  async * one_by_one(urls, fetchFn) {
+    for (const url of urls) {
+      const name = await fetchFn(url);
+      yield name;
     }
   }
 }
@@ -76,4 +91,4 @@ if (!movieId) {
 const api = new StarWarsAPI(STAR_WARS_API_BASE_URL);
 const app = new StarWarsCharactersApp(api);
 
-app.displayCharacters(movieId);
+app.displayCharacters(movieId, false);
