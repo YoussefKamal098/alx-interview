@@ -1,4 +1,4 @@
-### **README.md for "0. Change comes from within" Project**
+# Making Change Problem
 
 ---
 
