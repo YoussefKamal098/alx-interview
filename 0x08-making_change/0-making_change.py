@@ -1,20 +1,20 @@
 #!/usr/bin/python3
 """
 Module for determining the minimum number of coins needed to meet a
-given amount total. The function uses a recursive dynamic programming
-approach with memoization to find the optimal solution.
+given amount total. The function uses an iterative dynamic programming
+approach to find the optimal solution.
 """
 
 
 def makeChange(coins, total):
     """
     Function to determine the minimum number of coins required to meet a
-    total using a recursive dynamic programming approach.
+    total using an iterative dynamic programming approach.
 
     This function calculates the minimum number of coins needed to
     reach the target total using an infinite supply of coins from
-    the given denominations. The solution uses memoization to optimize
-    recursive calls and avoid redundant calculations.
+    the given denominations. The solution uses an iterative approach
+    to fill a dynamic programming table and find the optimal solution.
 
     Args:
         coins (list): List of coin denominations (positive integers).
@@ -25,27 +25,15 @@ def makeChange(coins, total):
              Returns 0 if the total is 0 or less.
              Returns -1 if the total cannot be met with the given coins.
     """
-
-    def dp_recursive(coins, total, memo):
-        if total == 0:
-            return 0
-        if total < 0:
-            return float('inf')
-        if total in memo:
-            return memo[total]
-
-        min_coins = float('inf')
-
-        for coin in coins:
-            res = dp_recursive(coins, total - coin, memo)
-            if res != float('inf'):
-                min_coins = min(min_coins, res + 1)
-
-        memo[total] = min_coins
-        return min_coins
-
     if total <= 0:
         return 0
 
-    result = dp_recursive(coins, total, {})
-    return result if result != float('inf') else -1
+    dp = [float('inf')] * (total + 1)
+    dp[0] = 0
+
+    for amount in range(1, total + 1):
+        for coin in coins:
+            if amount - coin >= 0:
+                dp[amount] = min(dp[amount], dp[amount - coin] + 1)
+
+    return dp[total] if dp[total] != float('inf') else -1
