@@ -1,13 +1,15 @@
 # Making Change Problem
 
+Here's an updated README for the **Making Change Problem** reflecting the changes that the greedy approach does not always work and that the dynamic programming (DP) approach should be used instead. The new solution includes both the iterative and recursive DP approaches.
+
 ---
 
-# **0. Change Comes From Within**
+# **Change Comes From Within**
 
 ## **Project Overview**
-In this project, you will solve the classic **Coin Change Problem**, a problem from dynamic programming and greedy algorithms. The goal is to find the **fewest number of coins** required to make up a given total amount using an infinite supply of coins from a set of given denominations.
+In this project, you will solve the classic **Coin Change Problem**, a problem from dynamic programming. The goal is to find the **fewest number of coins** required to make up a given total amount using an infinite supply of coins from a set of given denominations.
 
-The project challenges you to apply your understanding of algorithms to devise an efficient solution, keeping in mind the limitations of greedy algorithms and when to use dynamic programming.
+This project challenges you to apply your understanding of dynamic programming and greedy algorithms, highlighting the limitations of the greedy approach and how dynamic programming provides a more reliable solution.
 
 ## **Project Requirements**
 1. **Allowed Editors**: vi, vim, emacs
@@ -18,7 +20,7 @@ The project challenges you to apply your understanding of algorithms to devise a
 6. **File Naming**: The first line of all files should be `#!/usr/bin/python3`.
 
 ## **Problem Statement**
-You are given a list of coin denominations, and a total amount. Your task is to find the minimum number of coins required to meet the total amount, using any number of coins from the given denominations.
+You are given a list of coin denominations and a total amount. Your task is to find the minimum number of coins required to meet the total amount, using any number of coins from the given denominations.
 
 ### **Prototype**:
 ```python
@@ -39,27 +41,16 @@ def makeChange(coins, total):
 ## **Algorithm Solution**
 
 ### **Greedy Approach**:
-In the greedy algorithm, we aim to use the largest denominations first to reduce the total as quickly as possible. This approach works optimally in many cases, but it may fail in cases where a better solution exists with smaller denominations.
+The greedy algorithm aims to use the largest denominations first to reduce the total as quickly as possible. While this approach works optimally in many cases, it may fail in situations where a better solution exists using smaller denominations.
+
+For example:
+- With coins `[1, 2, 5]`, for a total of `6`, the greedy approach would give you `1 coin of 5 + 1 coin of 1`, which results in `2 coins`. But the optimal solution is `3 coins of 2`.
+
+Thus, **the greedy approach does not always work** for all cases. We need a more robust solution like dynamic programming.
 
 ```python
 #!/usr/bin/python3
-"""
-Determines the minimum number of coins required to meet a given total amount.
-"""
-
 def makeChange(coins, total):
-    """
-    Function to determine the minimum number of coins required to meet a total.
-    
-    Args:
-        coins (list): List of coin denominations (positive integers).
-        total (int): Target amount to achieve.
-        
-    Returns:
-        int: Minimum number of coins required to meet the total.
-             Returns 0 if the total is 0 or less.
-             Returns -1 if the total cannot be met with the given coins.
-    """
     if total <= 0:
         return 0
 
@@ -76,7 +67,62 @@ def makeChange(coins, total):
     return count if total == 0 else -1
 ```
 
-### **Testing the Code**:
+---
+
+## **Dynamic Programming Solution**:
+
+The **dynamic programming (DP)** approach is the correct solution to this problem. It ensures that the result is optimal by considering all possible ways to reach the total, using the minimum number of coins. 
+
+- **Iterative DP Solution**:
+The iterative solution builds up the minimum number of coins for each amount from `0` to the target total.
+
+```python
+def makeChange(coins, total):
+    if total <= 0:
+        return 0
+
+    dp = [float('inf')] * (total + 1)
+    dp[0] = 0  # No coins needed to make 0
+
+    for coin in coins:
+        for x in range(coin, total + 1):
+            dp[x] = min(dp[x], dp[x - coin] + 1)
+
+    return dp[total] if dp[total] != float('inf') else -1
+```
+
+- **Recursive DP Solution**:
+A recursive approach can be used with memoization to store previously computed results, thus avoiding redundant calculations.
+
+```python
+def makeChange(coins, total):
+    def dp_recursive(coins, total, memo):
+        if total == 0:
+            return 0
+        if total < 0:
+            return float('inf')
+        if total in memo:
+            return memo[total]
+
+        min_coins = float('inf')
+        for coin in coins:
+            res = dp_recursive(coins, total - coin, memo)
+            if res != float('inf'):
+                min_coins = min(min_coins, res + 1)
+
+        memo[total] = min_coins
+        return min_coins
+
+    if total <= 0:
+        return 0
+
+    result = dp_recursive(coins, total, {})
+    return result if result != float('inf') else -1
+```
+
+---
+
+## **Testing the Code**:
 Create a test file `0-main.py`:
 
 ```python
@@ -99,38 +145,20 @@ print(makeChange([5, 10, 25], 3))  # Expected output: -1
 ## **Time and Space Complexity Analysis**
 
 ### **Time Complexity**:
-- Sorting the list of coins takes `O(n log n)`, where `n` is the number of different coin denominations.
-- The loop that iterates through the sorted coins list runs in `O(n)` time, where `n` is the number of coins.
-- The total time complexity is **O(n log n)**.
+- **Greedy Approach**: Sorting the list of coins takes `O(n log n)`, where `n` is the number of coin denominations. The loop to iterate over the coins is `O(n)`. Therefore, the total time complexity is **O(n log n)**.
+- **Dynamic Programming**:
+    - **Iterative DP**: The loop over coins and the inner loop for each total value give a time complexity of **O(n * total)**, where `n` is the number of coins and `total` is the target amount.
+    - **Recursive DP**: The recursive solution has a time complexity of **O(n * total)**, where memoization reduces the redundant work.
 
 ### **Space Complexity**:
-- The space complexity is **O(1)** because the solution only uses a few extra variables and doesn't depend on the input size.
-
-### **Dynamic Programming Alternative**:
-If a greedy approach is not suitable for some coin sets, a dynamic programming solution can be used:
-
-```python
-def makeChange(coins, total):
-    if total <= 0:
-        return 0
-
-    dp = [float('inf')] * (total + 1)
-    dp[0] = 0
-
-    for coin in coins:
-        for x in range(coin, total + 1):
-            dp[x] = min(dp[x], dp[x - coin] + 1)
-
-    return dp[total] if dp[total] != float('inf') else -1
-```
-
-This dynamic programming approach ensures that the solution is always optimal, but it has a higher time and space complexity of **O(n * total)**, where `n` is the number of coins and `total` is the target amount.
+- **Greedy Approach**: The space complexity is **O(1)** because only a few extra variables are used.
+- **Dynamic Programming**:
+    - **Iterative DP**: The space complexity is **O(total)** due to the `dp` array.
+    - **Recursive DP**: The space complexity is **O(total)** due to the recursion stack and memoization.
 
 ---
 
-## **Conclusion**
-- The solution to the coin change problem depends on the type of coin denominations.
-- The greedy algorithm works well for standard coin sets but may fail in certain cases, for which a dynamic programming solution should be applied.
-- Understanding when to use which algorithm is key to optimizing for both correctness and efficiency.
+### **Conclusion**
+- The **greedy approach** is **not always reliable** and may fail in some cases (e.g., when the optimal solution requires using smaller denominations first).
+- The **dynamic programming solution** ensures an optimal and reliable result, especially when the greedy approach fails.
 
----
