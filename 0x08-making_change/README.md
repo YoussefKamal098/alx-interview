@@ -1,11 +1,5 @@
 # Making Change Problem
 
-Here's an updated README for the **Making Change Problem** reflecting the changes that the greedy approach does not always work and that the dynamic programming (DP) approach should be used instead. The new solution includes both the iterative and recursive DP approaches.
-
----
-
-# **Change Comes From Within**
-
 ## **Project Overview**
 In this project, you will solve the classic **Coin Change Problem**, a problem from dynamic programming. The goal is to find the **fewest number of coins** required to make up a given total amount using an infinite supply of coins from a set of given denominations.
 
