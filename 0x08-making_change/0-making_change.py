@@ -6,7 +6,7 @@ approach with memoization to find the optimal solution.
 """
 
 
-def makeChange(coins: list[int], total: int) -> int:
+def makeChange(coins, total):
     """
     Function to determine the minimum number of coins required to meet a
     total using a recursive dynamic programming approach.
