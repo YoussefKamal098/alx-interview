@@ -158,18 +158,4 @@ print(island_perimeter(grid))  # Output should be 8
 
 ---
 
-## Submission Checklist
-
-- [x] Python files are executable and PEP 8 compliant.
-- [x] README.md is included and well-documented.
-- [x] Code is thoroughly tested with edge cases.
-- [x] Includes no external module imports.
-
-**Repository**:
-- **GitHub**: [alx-interview](https://github.com/alx-interview)
-- **Directory**: `0x09-island_perimeter`
-- **File**: `0-island_perimeter.py`
-
----
-
 Happy coding! 🚀
